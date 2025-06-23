@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>IMC Unit 1 Flash-cards</title>
+  <style>
+    :root{font-family:Arial,sans-serif;--primary:#5d2028;--bg:#f5f7fa}
+    body{margin:0;padding:0;background:var(--bg)}
+    header{background:var(--primary);position:relative;color:#fff;padding:1rem 2rem;}
+    header .title{font-size:1.5rem;}
+    header .actions{position:absolute;top:50%;right:2rem;transform:translateY(-50%);}
+    header .actions button{margin-left:0.5rem;}
+    #homeView,#cardView,#uploadSection{padding:1rem 2rem;}
+    .card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem}
+    .card-button{background:#fff;border:2px solid var(--primary);border-radius:8px;padding:1rem;cursor:pointer;width:100%;height:100px;overflow:hidden;text-align:center;color:black;display:flex;align-items:center;justify-content:center;}
+    .card-button:hover{background:#5d2028;}
+    #cardBox{background:#fff;border:2px solid var(--primary);border-radius:8px;padding:2rem;min-height:150px}
+    #cardText{font-size:1.3rem;line-height:1.5;transition:opacity 0.3s ease;}
+    .nav-btns{margin-top:1rem}
+    button, input[type=file]{background:var(--primary);color:#fff;border:none;padding:.5rem 1rem;margin-right:.5rem;cursor:pointer;border-radius:4px}
+    input[type=text]{padding:.5rem; margin-right:.5rem; width:200px; border:1px solid #ccc; border-radius:4px;}
+    button:hover,input[type=file]:hover{opacity:.85}
+  </style>
+</head>
+<body>
+  <header>
+    <span class="title">IMC Unit 1 Flash-cards</span>
+    <div class="actions">
+      <button id="homeBtn">Home</button>
+      <button id="randomBtn">Random Card</button>
+      <button id="printSelectedBtn">Print Selected Cards</button>
+      <button id="printAllBtn">Print All Cards</button>
+      <button id="addBtn">Add More Cards</button>
+    </div>
+  </header>
+
+  <section id="uploadSection" style="display:none;">
+    <label for="fileInput" style="color:#333;">Bulk upload CSV (Front,Back):</label>
+    <input type="file" id="fileInput" accept=".csv" />
+    <div style="margin-top:1rem;">
+      <input type="text" id="manualFront" placeholder="Manual Front text" />
+      <input type="text" id="manualBack" placeholder="Manual Back text" />
+      <button id="addManualBtn">Add Card</button>
+      <button id="cancelBtn">Cancel</button>
+    </div>
+  </section>
+
+  <section id="homeView" style="display:none;">
+    <h2>Select a card</h2>
+    <div class="card-grid" id="gridContainer"></div>
+  </section>
+
+  <section id="cardView" style="display:none;">
+    <div id="cardBox">
+      <div id="cardText"></div>
+    </div>
+    <div class="nav-btns">
+      <button id="prevBtn">Previous</button>
+      <button id="nextBtn">Next</button>
+      <button id="flipBtn">Flip</button>
+    </div>
+  </section>
+
+  <script>
+    let cards = [];
+    const fileInput = document.getElementById('fileInput');
+    const uploadSection = document.getElementById('uploadSection');
+    const homeView = document.getElementById('homeView');
+    const cardView = document.getElementById('cardView');
+    const grid = document.getElementById('gridContainer');
+    const cardText = document.getElementById('cardText');
+    const addBtn = document.getElementById('addBtn');
+    const randomBtn = document.getElementById('randomBtn');
+    const printAllBtn = document.getElementById('printAllBtn');
+    const printSelectedBtn = document.getElementById('printSelectedBtn');
+    const addManualBtn = document.getElementById('addManualBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const homeBtn = document.getElementById('homeBtn');
+    let current = 0, showingFront = true;
+
+    function showHome() {
+      uploadSection.style.display = 'none';
+      homeView.style.display = 'block';
+      cardView.style.display = 'none';
+    }
+
+    function buildGrid() {
+      grid.innerHTML = '';
+      cards.forEach((c, i) => {
+        const cardWrapper = document.createElement('div');
+        cardWrapper.style.position = 'relative';
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox'; checkbox.className = 'select-checkbox';
+        checkbox.style.position = 'absolute'; checkbox.style.top = '8px'; checkbox.style.right = '8px';
+        checkbox.dataset.index = i; cardWrapper.appendChild(checkbox);
+        const btn = document.createElement('button');
+        btn.className = 'card-button';
+        btn.textContent = c.Front.length > 50 ? c.Front.slice(0,50)+'…' : c.Front;
+        btn.onclick = () => openCard(i);
+        cardWrapper.appendChild(btn);
+        grid.appendChild(cardWrapper);
+      });
+    }
+
+    function openCard(idx) {
+      current = idx; showingFront = true;
+      cardText.textContent = cards[current].Front;
+      cardView.style.display = 'block'; homeView.style.display = 'none';
+    }
+
+    function loadSaved() {
+      const saved = localStorage.getItem('flashcards');
+      if (saved) try { cards = JSON.parse(saved); } catch {};
+    }
+
+    // Initialize
+    loadSaved(); showHome(); buildGrid();
+
+    addBtn.onclick = () => { uploadSection.style.display = 'block'; homeView.style.display = 'none'; };
+    homeBtn.onclick = showHome;
+    cancelBtn.onclick = showHome;
+
+    addManualBtn.onclick = () => {
+      const f = document.getElementById('manualFront').value.trim();
+      const b = document.getElementById('manualBack').value.trim();
+      if (f && b) {
+        cards.push({Front:f,Back:b}); localStorage.setItem('flashcards',JSON.stringify(cards));
+        document.getElementById('manualFront').value = '';
+        document.getElementById('manualBack').value = '';
+        showHome(); buildGrid();
+      }
+    };
+
+    fileInput.addEventListener('change', e => {
+      const file = e.target.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = evt => {
+        const lines = evt.target.result.trim().split(/\r?\n/);
+        lines.slice(1).forEach(line => {
+          const parts = line.match(/(".*?"|[^,]+),(?:"(.*?)"|(.+))/);
+          if (parts) {
+            const f = (parts[1]||'').replace(/^"|"$/g,'');
+            const b = (parts[2]||parts[3]||'').replace(/^"|"$/g,'');
+            cards.push({Front:f,Back:b});
+          }
+        });
+        localStorage.setItem('flashcards',JSON.stringify(cards));
+        fileInput.value=''; showHome(); buildGrid();
+      };
+      reader.readAsText(file);
+    });
+
+    randomBtn.onclick = () => {
+      if (!cards.length) return;
+      const idx = Math.floor(Math.random()*cards.length);
+      openCard(idx);
+    };
+
+    document.getElementById('flipBtn').onclick = () => {
+      showingFront = !showingFront;
+      cardText.textContent = showingFront ? cards[current].Front : cards[current].Back;
+    };
+    // allow clicking on the card box to flip
+    document.getElementById('cardBox').onclick = () => {
+      showingFront = !showingFront;
+      cardText.textContent = showingFront ? cards[current].Front : cards[current].Back;
+    };
+    document.getElementById('prevBtn').onclick = () => { openCard((current-1+cards.length)%cards.length); };
+    document.getElementById('nextBtn').onclick = () => { openCard((current+1)%cards.length); };
+
+    printAllBtn.onclick = () => {
+      const w = window.open('', '_blank');
+      w.document.write('<html><head><title>All Flash-cards</title>');
+      w.document.write('<style>body{font-family:Arial,sans-serif;} .card{border:1px solid #000;margin:10px;padding:10px;}</style>');
+      w.document.write('</head><body>');
+      cards.forEach((c,i)=>w.document.write('<div class="card"><h3>'+ (i+1) +'. '+c.Front+'</h3><p>'+c.Back+'</p></div>'));
+      w.document.write('</body></html>'); w.document.close(); w.print();
+    };
+
+    printSelectedBtn.onclick = () => {
+      const sel = Array.from(document.getElementsByClassName('select-checkbox')).filter(cb=>cb.checked).map(cb=>cards[cb.dataset.index]);
+      if (!sel.length) { alert('No cards selected'); return; }
+      const w = window.open('', '_blank');
+      w.document.write('<html><head><title>Selected Flash-cards</title>');
+      w.document.write('<style>body{font-family:Arial,sans-serif;} .card{border:1px solid #000;margin:10px;padding:10px;}</style>');
+      w.document.write('</head><body>');
+      sel.forEach((c,i)=>w.document.write('<div class="card"><h3>'+ (i+1) +'. '+c.Front+'</h3><p>'+c.Back+'</p></div>'));
+      w.document.write('</body></html>'); w.document.close(); w.print();
+    };
+  </script>
+</body>
+</html>
