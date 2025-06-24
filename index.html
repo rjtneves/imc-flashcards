@@ -4,56 +4,66 @@
   <meta charset="UTF-8">
   <title>IMC Unit 1 Flash-cards</title>
   <style>
-    :root{font-family:Arial,sans-serif;--primary:#5d2028;--bg:#f5f7fa}
-    body{margin:0;padding:0;background:var(--bg)}
-    header{background:var(--primary);position:relative;color:#fff;padding:1rem 2rem;}
-    header .title{font-size:1.5rem;}
-    header .actions{position:absolute;top:50%;right:2rem;transform:translateY(-50%);}
-    header .actions button{margin-left:0.5rem;}
-    #homeView,#cardView,#uploadSection{padding:1rem 2rem;}
-    .card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem}
-    .card-button{background:#fff;border:2px solid var(--primary);border-radius:8px;padding:1rem;cursor:pointer;width:100%;height:100px;overflow:hidden;text-align:center;color:black;display:flex;align-items:center;justify-content:center;}
-    .card-button:hover{background:#5d2028;}
-    #cardBox{background:#fff;border:2px solid var(--primary);border-radius:8px;padding:2rem;min-height:150px}
-    #cardText{font-size:1.3rem;line-height:1.5;transition:opacity 0.3s ease;}
-    .nav-btns{margin-top:1rem}
-    button, input[type=file]{background:var(--primary);color:#fff;border:none;padding:.5rem 1rem;margin-right:.5rem;cursor:pointer;border-radius:4px}
-    input[type=text]{padding:.5rem; margin-right:.5rem; width:200px; border:1px solid #ccc; border-radius:4px;}
-    button:hover,input[type=file]:hover{opacity:.85}
+    :root { font-family: Arial, sans-serif; --primary: #5d2028; --bg: #f5f7fa; }
+    body { margin: 0; padding: 0; background: var(--bg); }
+    header { background: var(--primary); color: #fff; padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; }
+    header .title { font-size: 1.5rem; }
+    header .actions button { background: transparent; color: #fff; border: 1px solid #fff; padding: .5rem 1rem; margin-left: .5rem; border-radius: 4px; cursor: pointer; }
+    header .actions { display: none; }
+    section { padding: 1rem 2rem; }
+    /* Professional sign-in card */
+    #authSection { max-width: 360px; margin: 4rem auto; background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    #authSection h2 { margin-top: 0; color: var(--primary); }
+    #authSection input { width: 100%; padding: .75rem; margin: .5rem 0; border: 1px solid #ccc; border-radius: 4px; }
+    #authSection button { width: 100%; background: var(--primary); color: #fff; border: none; padding: .75rem; margin-top: 1rem; font-size: 1rem; border-radius: 4px; cursor: pointer; }
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 1rem; }
+    .card-button { background: #fff; border: 2px solid var(--primary); border-radius: 8px; padding: 1rem; cursor: pointer; height: 100px; display: flex; align-items: center; justify-content: center; text-align: center; color: black; }
+    .card-button:hover { background: #5d2028; color: #fff; }
+    #cardBox { background: #fff; border: 2px solid var(--primary); border-radius: 8px; padding: 2rem; min-height: 150px; margin-bottom: 1rem; }
+    #cardText { font-size: 1.3rem; line-height: 1.5; transition: opacity 0.3s ease; }
+    .nav-btns button { background: var(--primary); color: #fff; border: none; padding: .5rem 1rem; margin-right: .5rem; border-radius: 4px; cursor: pointer; }
+    .nav-btns { margin-top: 1rem; }
+    button:hover { opacity: .85; }
   </style>
 </head>
 <body>
   <header>
-    <span class="title">IMC Unit 1 Flash-cards</span>
+    <div class="title">IMC Unit 1 Flash-cards</div>
     <div class="actions">
       <button id="homeBtn">Home</button>
       <button id="randomBtn">Random Card</button>
-      <button id="printSelectedBtn">Print Selected Cards</button>
-      <button id="printAllBtn">Print All Cards</button>
-      <button id="addBtn">Add More Cards</button>
+      <button id="printSelectedBtn">Print Selected</button>
+      <button id="printAllBtn">Print All</button>
+      <button id="addBtn">Add More</button>
+      <button id="signOutBtn">Sign Out</button>
     </div>
   </header>
 
+  <section id="authSection">
+    <h2>Sign In to Your Flash-cards</h2>
+    <input type="email" id="email" placeholder="Email address" />
+    <input type="password" id="password" placeholder="Password" />
+    <button id="signInBtn">Sign In / Sign Up</button>
+  </section>
+
   <section id="uploadSection" style="display:none;">
-    <label for="fileInput" style="color:#333;">Bulk upload CSV (Front,Back):</label>
-    <input type="file" id="fileInput" accept=".csv" />
+    <label for="fileInput">Bulk upload CSV (Front, Back):</label><br>
+    <input type="file" id="fileInput" accept=".csv" style="margin-top:.5rem;" />
     <div style="margin-top:1rem;">
-      <input type="text" id="manualFront" placeholder="Manual Front text" />
-      <input type="text" id="manualBack" placeholder="Manual Back text" />
+      <input type="text" id="manualFront" placeholder="Question text" />
+      <input type="text" id="manualBack" placeholder="Answer text" />
       <button id="addManualBtn">Add Card</button>
       <button id="cancelBtn">Cancel</button>
     </div>
   </section>
 
   <section id="homeView" style="display:none;">
-    <h2>Select a card</h2>
+    <h2>Select a Card</h2>
     <div class="card-grid" id="gridContainer"></div>
   </section>
 
   <section id="cardView" style="display:none;">
-    <div id="cardBox">
-      <div id="cardText"></div>
-    </div>
+    <div id="cardBox"><div id="cardText"></div></div>
     <div class="nav-btns">
       <button id="prevBtn">Previous</button>
       <button id="nextBtn">Next</button>
@@ -61,9 +71,46 @@
     </div>
   </section>
 
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+    const supabaseUrl = 'https://ojpuxtmjcchzpafnqpnm.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qcHV4dG1qY2NoenBhZm5xcG5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NzM1NTMsImV4cCI6MjA2NjM0OTU1M30.JaQJkQR_tenzYXtoCfr4DHAe3J3C2PeeIiy3_8VLoK8';
+    const supabase    = createClient(supabaseUrl, supabaseKey);
+    window.supabase = supabase;
+
+    // Auth flow
+    document.getElementById('signInBtn').onclick = async () => {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      let { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ email, password });
+        if (signUpError) return alert(signUpError.message);
+        return alert('Sign-up successful! Check your email to confirm your account.');
+      }
+      document.querySelector('header .actions').style.display = 'flex';
+      document.getElementById('authSection').style.display = 'none';
+      await loadUserCards();
+    };
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        document.querySelector('header .actions').style.display = 'flex';
+        document.getElementById('authSection').style.display = 'none';
+        await loadUserCards();
+      }
+    })();
+    supabase.auth.onAuthStateChange((_, session) => {
+      if (session) {
+        document.querySelector('header .actions').style.display = 'flex';
+        document.getElementById('authSection').style.display = 'none';
+        loadUserCards();
+      }
+    });
+  </script>
+
   <script>
     let cards = [];
-    const fileInput = document.getElementById('fileInput');
     const uploadSection = document.getElementById('uploadSection');
     const homeView = document.getElementById('homeView');
     const cardView = document.getElementById('cardView');
@@ -76,117 +123,40 @@
     const addManualBtn = document.getElementById('addManualBtn');
     const cancelBtn = document.getElementById('cancelBtn');
     const homeBtn = document.getElementById('homeBtn');
-    let current = 0, showingFront = true;
+    const signOutBtn = document.getElementById('signOutBtn');
+    let current=0,showingFront=true;
 
-    function showHome() {
+    function showHome(){ uploadSection.style.display='none';homeView.style.display='block';cardView.style.display='none'; }
+    function buildGrid(){ grid.innerHTML='';cards.forEach((c,i)=>{const w=document.createElement('div');w.style.position='relative';const cb=document.createElement('input');cb.type='checkbox';cb.className='select-checkbox';cb.style.position='absolute';cb.style.top='8px';cb.style.right='8px';cb.dataset.index=i;w.appendChild(cb);const btn=document.createElement('button');btn.className='card-button';btn.textContent=c.front.length>50?c.front.slice(0,50)+'…':c.front;btn.onclick=()=>openCard(i);w.appendChild(btn);grid.appendChild(w);});}
+    function openCard(i){current=i;showingFront=true;cardText.textContent=cards[i].front;cardView.style.display='block';homeView.style.display='none';}
+
+    async function loadUserCards(){const { data:{ user }}=await supabase.auth.getUser();if(!user)return;const { data, error }=await supabase.from('cards').select('id, front, back').eq('user_id',user.id).order('created_at',{ascending:true});if(error)return console.error(error);cards=data;buildGrid();showHome();}
+    async function saveCard(f,b){const { data:{ user }}=await supabase.auth.getUser();if(!user)return;const { error }=await supabase.from('cards').insert([{ user_id:user.id,front:f,back:b }]);if(error)console.error(error);else await loadUserCards();}
+
+    addBtn.onclick=()=>{uploadSection.style.display='block';homeView.style.display='none';};homeBtn.onclick=showHome;cancelBtn.onclick=showHome;randomBtn.onclick=()=>{if(!cards.length)return;openCard(Math.floor(Math.random()*cards.length));};
+    document.getElementById('flipBtn').onclick=()=>{showingFront=!showingFront;cardText.textContent=showingFront?cards[current].front:cards[current].back;};
+    document.getElementById('cardBox').onclick=()=>document.getElementById('flipBtn').onclick();
+    document.getElementById('prevBtn').onclick=()=>openCard((current-1+cards.length)%cards.length);
+    document.getElementById('nextBtn').onclick=()=>openCard((current+1)%cards.length);
+    signOutBtn.onclick=async()=>{
+      await supabase.auth.signOut();
+      // Hide all views, reset UI
+      document.querySelector('header .actions').style.display = 'none';
+      document.getElementById('authSection').style.display = 'block';
       uploadSection.style.display = 'none';
-      homeView.style.display = 'block';
+      homeView.style.display = 'none';
       cardView.style.display = 'none';
-    }
-
-    function buildGrid() {
       grid.innerHTML = '';
-      cards.forEach((c, i) => {
-        const cardWrapper = document.createElement('div');
-        cardWrapper.style.position = 'relative';
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox'; checkbox.className = 'select-checkbox';
-        checkbox.style.position = 'absolute'; checkbox.style.top = '8px'; checkbox.style.right = '8px';
-        checkbox.dataset.index = i; cardWrapper.appendChild(checkbox);
-        const btn = document.createElement('button');
-        btn.className = 'card-button';
-        btn.textContent = c.Front.length > 50 ? c.Front.slice(0,50)+'…' : c.Front;
-        btn.onclick = () => openCard(i);
-        cardWrapper.appendChild(btn);
-        grid.appendChild(cardWrapper);
-      });
-    }
-
-    function openCard(idx) {
-      current = idx; showingFront = true;
-      cardText.textContent = cards[current].Front;
-      cardView.style.display = 'block'; homeView.style.display = 'none';
-    }
-
-    function loadSaved() {
-      const saved = localStorage.getItem('flashcards');
-      if (saved) try { cards = JSON.parse(saved); } catch {};
-    }
-
-    // Initialize
-    loadSaved(); showHome(); buildGrid();
-
-    addBtn.onclick = () => { uploadSection.style.display = 'block'; homeView.style.display = 'none'; };
-    homeBtn.onclick = showHome;
-    cancelBtn.onclick = showHome;
-
-    addManualBtn.onclick = () => {
-      const f = document.getElementById('manualFront').value.trim();
-      const b = document.getElementById('manualBack').value.trim();
-      if (f && b) {
-        cards.push({Front:f,Back:b}); localStorage.setItem('flashcards',JSON.stringify(cards));
-        document.getElementById('manualFront').value = '';
-        document.getElementById('manualBack').value = '';
-        showHome(); buildGrid();
-      }
+      // Clear input fields
+      document.getElementById('email').value = '';
+      document.getElementById('password').value = '';
     };
 
-    fileInput.addEventListener('change', e => {
-      const file = e.target.files[0]; if (!file) return;
-      const reader = new FileReader();
-      reader.onload = evt => {
-        const lines = evt.target.result.trim().split(/\r?\n/);
-        lines.slice(1).forEach(line => {
-          const parts = line.match(/(".*?"|[^,]+),(?:"(.*?)"|(.+))/);
-          if (parts) {
-            const f = (parts[1]||'').replace(/^"|"$/g,'');
-            const b = (parts[2]||parts[3]||'').replace(/^"|"$/g,'');
-            cards.push({Front:f,Back:b});
-          }
-        });
-        localStorage.setItem('flashcards',JSON.stringify(cards));
-        fileInput.value=''; showHome(); buildGrid();
-      };
-      reader.readAsText(file);
-    });
+    addManualBtn.onclick=async()=>{const f=document.getElementById('manualFront').value.trim(),b=document.getElementById('manualBack').value.trim();if(f&&b){await saveCard(f,b);document.getElementById('manualFront').value='';document.getElementById('manualBack').value='';}}
+    document.getElementById('fileInput').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=async evt=>{const lines=evt.target.result.trim().split(/\r?\n/);for(let l of lines.slice(1)){const p=l.match(/(".*?"|[^,]+),(?:"(.*?)"|(.+))/);if(p){const f=(p[1]||"").replace(/^"|"$/g,""),b=(p[2]||p[3]||"").replace(/^"|"$/g,"");await saveCard(f,b);} }e.target.value='';};r.readAsText(file);} );
 
-    randomBtn.onclick = () => {
-      if (!cards.length) return;
-      const idx = Math.floor(Math.random()*cards.length);
-      openCard(idx);
-    };
-
-    document.getElementById('flipBtn').onclick = () => {
-      showingFront = !showingFront;
-      cardText.textContent = showingFront ? cards[current].Front : cards[current].Back;
-    };
-    // allow clicking on the card box to flip
-    document.getElementById('cardBox').onclick = () => {
-      showingFront = !showingFront;
-      cardText.textContent = showingFront ? cards[current].Front : cards[current].Back;
-    };
-    document.getElementById('prevBtn').onclick = () => { openCard((current-1+cards.length)%cards.length); };
-    document.getElementById('nextBtn').onclick = () => { openCard((current+1)%cards.length); };
-
-    printAllBtn.onclick = () => {
-      const w = window.open('', '_blank');
-      w.document.write('<html><head><title>All Flash-cards</title>');
-      w.document.write('<style>body{font-family:Arial,sans-serif;} .card{border:1px solid #000;margin:10px;padding:10px;}</style>');
-      w.document.write('</head><body>');
-      cards.forEach((c,i)=>w.document.write('<div class="card"><h3>'+ (i+1) +'. '+c.Front+'</h3><p>'+c.Back+'</p></div>'));
-      w.document.write('</body></html>'); w.document.close(); w.print();
-    };
-
-    printSelectedBtn.onclick = () => {
-      const sel = Array.from(document.getElementsByClassName('select-checkbox')).filter(cb=>cb.checked).map(cb=>cards[cb.dataset.index]);
-      if (!sel.length) { alert('No cards selected'); return; }
-      const w = window.open('', '_blank');
-      w.document.write('<html><head><title>Selected Flash-cards</title>');
-      w.document.write('<style>body{font-family:Arial,sans-serif;} .card{border:1px solid #000;margin:10px;padding:10px;}</style>');
-      w.document.write('</head><body>');
-      sel.forEach((c,i)=>w.document.write('<div class="card"><h3>'+ (i+1) +'. '+c.Front+'</h3><p>'+c.Back+'</p></div>'));
-      w.document.write('</body></html>'); w.document.close(); w.print();
-    };
+    printAllBtn.onclick=()=>{const w=window.open('','_blank');w.document.write('<html><head><title>All Flash-cards</title>');w.document.write('<style>body{font-family:Arial,sans-serif;} .card{border:1px solid #000;margin:10px;padding:10px;}</style>');w.document.write('</head><body>');cards.forEach((c,i)=>w.document.write('<div class="card"><h3>'+(i+1)+'. '+c.front+'</h3><p>'+c.back+'</p></div>'));w.document.write('</body></html>');w.document.close();w.print();};
+    printSelectedBtn.onclick=()=>{const sel=Array.from(document.getElementsByClassName('select-checkbox')).filter(cb=>cb.checked).map(cb=>cards[cb.dataset.index]);if(!sel.length){alert('No cards selected');return;}const w=window.open('','_blank');w.document.write('<html><head><title>Selected Flash-cards</title>');w.document.write('<style>body{font-family:Arial,sans-serif;} .card{border:1px solid #000;margin:10px;padding:10px;}</style>');w.document.write('</head><body>');sel.forEach((c,i)=>w.document.write('<div class="card"><h3>'+(i+1)+'. '+c.front+'</h3><p>'+c.back+'</p></div>'));w.document.write('</body></html>');w.document.close();w.print();};
   </script>
 </body>
 </html>
